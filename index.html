@@ -426,6 +426,9 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
 .map-boss image{animation:bb 3s ease-in-out infinite}
 .mp-chest{pointer-events:none}
 .sheet .sh-art img.avt{filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+
+.adv-sticky{position:sticky;top:0;z-index:30;display:flex;flex-direction:column;gap:8px;padding:8px 0 6px;margin:-8px 0 0;background:linear-gradient(var(--paper) 82%,rgba(0,0,0,0))}
+.adv-sticky .wtabs{padding-bottom:2px}
 </style>
 </head>
 <body>
@@ -1570,8 +1573,8 @@ SCREENS.push('s-adv','s-advq','s-kng');
   const w=document.querySelector('main.wrap');
   w.insertAdjacentHTML('beforeend',
   '<section id="s-adv" hidden><div class="col adv">'+
-    '<div class="adv-top"><button id="adv-back" class="link" type="button">← Ana menü</button><button id="adv-gold" class="goldchip" type="button"></button></div>'+
-    '<div class="wtabs" id="adv-tabs"></div>'+
+    '<div class="adv-sticky"><div class="adv-top"><button id="adv-back" class="link" type="button">← Ana menü</button><button id="adv-gold" class="goldchip" type="button"></button></div>'+
+    '<div class="wtabs" id="adv-tabs"></div></div>'+
     '<div class="wmap" id="adv-map"></div>'+
   '</div></section>'+
   '<section id="s-advq" hidden><div class="col advq">'+
@@ -1692,6 +1695,7 @@ function advRenderTabs(){
     b.addEventListener('click',()=>{advWorld=d;advMap(true)});
     t.appendChild(b);
   });
+  setTimeout(()=>{const on=t.querySelector('.on');if(on)t.scrollLeft=on.offsetLeft-t.clientWidth/2+on.clientWidth/2},0);
 }
 function advMap(scroll){
   const d=advWorld,w=WD[d],s=advStars(d),cur=advCur(d);
@@ -1729,7 +1733,26 @@ function advMap(scroll){
     g.addEventListener('click',f);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}});
   });
   show('s-adv');
-  if(scroll){try{const t=m.querySelector('.nd.cur')||m.querySelector('.nd');t.scrollIntoView({block:'center',behavior:'auto'})}catch(e){}}
+  if(scroll){try{advJourney(m,NY[cur])}catch(e){}}
+}
+let advJT=0;['touchstart','wheel','mousedown'].forEach(ev=>addEventListener(ev,()=>{advJT++},{passive:true}));
+function advJourney(m,ny){
+  const st=document.querySelector('.adv-sticky'),sh=st?st.getBoundingClientRect().height:0;
+  const mapTop=()=>m.getBoundingClientRect().top+window.scrollY;
+  const top0=mapTop()-sh-6;
+  const target=Math.max(0,mapTop()+(ny/900)*m.getBoundingClientRect().height-(window.innerHeight+sh)*0.55);
+  const j=++advJT;
+  window.scrollTo(0,top0);
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce||Math.abs(target-top0)<40){window.scrollTo(0,target);return}
+  const dur=Math.min(1900,900+Math.abs(target-top0)*0.55),t0=performance.now()+450;
+  (function step(t){
+    if(j!==advJT)return;
+    if(t<t0){requestAnimationFrame(step);return}
+    const k=Math.min(1,(t-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    window.scrollTo(0,top0+(target-top0)*e);
+    if(k<1)requestAnimationFrame(step)
+  })(performance.now());
 }
 function advSheet(d,n){
   const boss=n===9,w=WD[d],s=advStars(d);
