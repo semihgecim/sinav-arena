@@ -429,6 +429,9 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
 
 .adv-sticky{position:sticky;top:0;z-index:30;display:flex;flex-direction:column;gap:8px;padding:8px 0 6px;margin:-8px 0 0;background:linear-gradient(var(--paper) 82%,rgba(0,0,0,0))}
 .adv-sticky .wtabs{padding-bottom:2px}
+.opt.sel{border-color:var(--gold,#ffc83d);background:rgba(255,200,61,.16);box-shadow:inset 0 0 0 2px var(--gold,#ffc83d),0 3px 0 var(--line)}
+.onb .opt.sel,.lvlup .opt.sel{position:relative;font-weight:700}
+.onb .opt.sel::after,.lvlup .opt.sel::after{content:'✓';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--gold,#ffc83d);font-size:18px;font-weight:800}
 </style>
 </head>
 <body>
@@ -1187,7 +1190,7 @@ function tlCheck(){
     slots[i].classList.add(ok?'ok':'no');
     slots[i].children[2].textContent=e[0];
   });
-  tl.score+=right;
+  tl.score+=right;pgBump(4,right);
   sfx(right===4?'goal':right>=2?'ok':'no');
   $('tl-score').innerHTML='Doğru yer: <b>'+tl.score+'</b>';
   $('tl-pool').innerHTML='';
@@ -1250,7 +1253,7 @@ function pPick(side,b){
   const a=pr2.sel.b,c=b;pr2.sel=null;a.classList.remove('sel');
   if(a.dataset.i===c.dataset.i){
     a.classList.add('done');c.classList.add('done');a.disabled=true;c.disabled=true;
-    pr2.score++;pr2.left--;sfx('ok');
+    pr2.score++;pr2.left--;pgBump(1,1);sfx('ok');
     $('pr-score').innerHTML='Doğru eşleşme: <b>'+pr2.score+'</b>';
     if(pr2.left===0){
       const bx=$('pr-res');bx.hidden=false;bx.className='card fb ok';
@@ -1259,7 +1262,7 @@ function pPick(side,b){
       $('pr-next').textContent=pr2.round===PRN-1?'Sonucu gör':'Sonraki tur';
     }
   }else{
-    pr2.miss++;sfx('no');
+    pr2.miss++;pgBump(1,0);sfx('no');
     [a,c].forEach(x=>{x.classList.add('shake');setTimeout(()=>x.classList.remove('shake'),320)});
   }
 }
@@ -1366,6 +1369,13 @@ function dersAch(){
     out.push({id:'d250_'+d,n:d+' uzmanı',d:d+' dersinde 250 doğru',t:3,f:()=>(PG.dc[d]||0)>=250});
   });
   return out;
+}
+function pgBump(ans,cor){
+  pgRoll();
+  const t=dayKey();
+  if(PG.last!==t){PG.streak=(PG.last===yesterdayKey())?PG.streak+1:1;PG.last=t;if(PG.streak>PG.best)PG.best=PG.streak}
+  PG.ans+=ans;PG.qa+=ans;PG.cor+=cor;PG.qc+=cor;
+  pgCheck();
 }
 function pgCheck(){
   pgRoll();
