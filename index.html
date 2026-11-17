@@ -432,6 +432,12 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
 .opt.sel{border-color:var(--gold,#ffc83d);background:rgba(255,200,61,.16);box-shadow:inset 0 0 0 2px var(--gold,#ffc83d),0 3px 0 var(--line)}
 .onb .opt.sel,.lvlup .opt.sel{position:relative;font-weight:700}
 .onb .opt.sel::after,.lvlup .opt.sel::after{content:'✓';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--gold,#ffc83d);font-size:18px;font-weight:800}
+
+.spb{position:absolute;right:-6px;top:-4px;font-weight:800;font-size:15px;pointer-events:none;animation:spfloat .9s ease-out forwards;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.spb.g{color:#4ade80}.spb.b{color:#ff6b6b}
+@keyframes spfloat{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-22px)}}
+.spflash{animation:spfl .4s}
+@keyframes spfl{0%{transform:scale(1.35)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -818,7 +824,7 @@ function rankInfo(xp){
 const MODES=[
   {t:'Maç',tag:'Düello',d:'Rakibe karşı 10 pozisyon. Hızlı bilen golü atar.',f:()=>startMatch()},
   {t:'Merdiven',tag:'Tek kişilik',d:'10 basamak, yanlışta düşersin. Jokerler var.',f:()=>startLadder()},
-  {t:'Hız Turu',tag:'Refleks',d:'60 saniye. Doğru süre uzatır, yanlış 5 saniye götürür.',f:()=>startSpeed()},
+  {t:'Hız Turu',tag:'Refleks',d:'60 saniye. Doğru +3 saniye ekler, yanlış 5 saniye götürür.',f:()=>startSpeed()},
   {t:'Hakem Kararı',tag:'Karar',d:'Verilen cevap doğru mu? 10 saniyede karar ver.',f:()=>startRef()},
   {t:'Zaman Çizgisi',tag:'Tarih',d:'Olayları eskiden yeniye sırala.',f:()=>startTL()},
   {t:'Eşleştirme',tag:'Bağlantı kur',d:'Eser–yazar, kavram–karşılık çiftlerini eşleştir.',f:()=>startPair()},
@@ -1048,6 +1054,12 @@ function startSpeed(){
   spTimer=setInterval(spTick,100);
   spNext();
 }
+function spBonus(t,good){
+  const tm=$('sp-time');if(!tm||!tm.parentNode)return;
+  const e=document.createElement('span');e.className='spb '+(good?'g':'b');e.textContent=t;
+  const par=tm.parentNode;par.style.position='relative';par.appendChild(e);setTimeout(()=>e.remove(),900);
+  tm.classList.remove('spflash');void tm.offsetWidth;tm.classList.add('spflash');
+}
 function spLeft(){return Math.max(0,(sp.end-Date.now())/1000)}
 function spTick(){
   const l=spLeft();
@@ -1076,10 +1088,10 @@ function spAnswer(i){
   if(ok){
     sfx('ok');sp.combo++;sp.best=Math.max(sp.best,sp.combo);sp.right++;
     sp.score+=100+Math.min(sp.combo,10)*20;
-    sp.end=Math.min(sp.end+1000,Date.now()+90000);
+    sp.end=Math.min(sp.end+3000,Date.now()+99000);spBonus('+3 sn',1);
   }else{
     sfx('no');sp.combo=0;sp.wrong++;sp.missed.push(c.idx);
-    sp.end-=5000;
+    sp.end-=5000;spBonus('-5 sn',0);
   }
   $('sp-score').textContent=fmt(sp.score);
   $('sp-combo').textContent=sp.combo>1?'Seri ×'+sp.combo:'';
@@ -1333,7 +1345,8 @@ const QUESTS=[
 ];
 function todaysQuests(){
   const d=new Date();const seed=d.getFullYear()*372+d.getMonth()*31+d.getDate();
-  const gl=PG.goal||20;const pick=[{id:'goal'+gl,t:gl+' soru cevapla (günlük hedef)',k:'qa',n:gl,xp:Math.round(gl*1.5)},QUESTS[2+(seed>>1)%2],QUESTS[4+(seed>>2)%2]];
+  const gl=PG.goal||20;const cn=Math.max(5,Math.round(gl*(0.5+((seed>>1)%2)*0.2)/5)*5),gn=gl<=10?1:gl<=20?2:gl<=40?3:4;
+  const pick=[{id:'goal'+gl,t:gl+' soru cevapla (günlük hedef)',k:'qa',n:gl,xp:Math.round(gl*1.5)},{id:'c'+cn,t:cn+' doğru cevap ver',k:'qc',n:cn,xp:Math.round(cn*2.5)},{id:'g'+gn,t:gn+' oyun bitir',k:'qg',n:gn,xp:gn*20}];
   return pick;
 }
 function pgRoll(){
