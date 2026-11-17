@@ -379,6 +379,18 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
 .ac-art img{height:96px!important;width:96px!important;object-fit:contain}
 .sh-art img.boss{width:auto!important}
 .ac-art img.boss{width:auto!important}
+
+/* Macera ve Krallığım eşit */
+.adv-entry{grid-template-columns:1fr 1fr}
+.adv-card:not(.kg){padding-right:16px}
+.adv-card .ac-art{height:84px;right:4px;bottom:2px}
+.adv-card .ac-art img{height:84px!important;width:84px!important}
+@media (max-width:380px){.adv-entry{grid-template-columns:1fr 1fr}}
+.adv-card .ac-t{padding-right:62px}
+.adv-card .ac-art svg{height:100%;width:auto;animation:none}
+.adv-card .ac-art{height:72px}
+.adv-card .ac-art img{height:72px!important;width:72px!important}
+.adv-card{min-height:124px}
 </style>
 </head>
 <body>
@@ -789,14 +801,14 @@ function home(){
     const n=d==='Tümü'?Q.length:Q.filter(q=>q[6]===d).length;
     const b=document.createElement('button');b.type='button';b.className='chip'+(S.ders===d?' on':'');
     b.innerHTML=DART[d]?aimg(DART[d],'cia'):ic(DICON[d]||'sparkles','ci');const sp=document.createElement('span');sp.textContent=d+' · '+n;b.appendChild(sp);
-    b.addEventListener('click',()=>{S.ders=d;save();home()});
+    b.addEventListener('click',()=>{const y=window.scrollY;S.ders=d;save();home();try{window.scrollTo(0,y)}catch(e){}});
     ch.appendChild(b);
   });
   const lv=$('lvl');lv.innerHTML='';
   Object.keys(CAPS).forEach(k=>{
     const b=document.createElement('button');b.type='button';b.className='chip'+(S.level===k?' on':'');
     b.textContent=k;
-    b.addEventListener('click',()=>{S.level=k;save();home()});
+    b.addEventListener('click',()=>{const y=window.scrollY;S.level=k;save();home();try{window.scrollTo(0,y)}catch(e){}});
     lv.appendChild(b);
   });
   const md=$('modes');md.innerHTML='';
@@ -1881,7 +1893,7 @@ function advEntry(){
   const d=advWorld,cur=advCur(d),done=advStars(d).filter(x=>x>0).length,lv=kingLevel();
   const tot=WORLD_ORDER.reduce((s,k)=>s+advStars(k).filter(x=>x>0).length,0);
   e.innerHTML='<button type="button" class="adv-card" id="adv-go"><div class="ac-art">'+heroSvg('happy')+'</div><div class="ac-t"><i>Yeni</i><b>Macera Haritası</b><span>'+WD[d].n+' · '+done+'/10 bölüm</span><em>Toplam '+tot+'/50 bölüm</em></div></button>'+
-    '<button type="button" class="adv-card kg" id="kng-go"><div class="ac-t"><i>'+kingTitle(lv)+'</i><b>Krallığım</b><span>'+fmt(ADV.gold)+' altın</span><em>Seviye '+lv+'/30</em></div></button>';
+    '<button type="button" class="adv-card kg" id="kng-go"><div class="ac-art"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 70V34h10v-6h8v6h4v-6h8v6h4v-6h8v6h10v36z" fill="#ffe08a" stroke="#0a1126" stroke-width="3" stroke-linejoin="round"/><path d="M34 70V52a6 6 0 0 1 12 0v18z" fill="#16407a" stroke="#0a1126" stroke-width="3"/><path d="M40 28V10l14 5-14 5" fill="#ff4d63" stroke="#0a1126" stroke-width="2.5" stroke-linejoin="round"/><rect x="18" y="42" width="6" height="9" rx="3" fill="#16407a"/><rect x="56" y="42" width="6" height="9" rx="3" fill="#16407a"/></svg></div><div class="ac-t"><i>'+kingTitle(lv)+'</i><b>Krallığım</b><span>'+fmt(ADV.gold)+' altın</span><em>Seviye '+lv+'/30</em></div></button>';
   e.querySelector('#adv-go').addEventListener('click',()=>{sfx('tap');advMap(true)});
   e.querySelector('#kng-go').addEventListener('click',()=>{sfx('tap');kngOpen()});
 }
