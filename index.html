@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
+<head><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="theme-color" content="#0c1428"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Sınav Arena"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sınav Arena</title>
@@ -1866,5 +1866,5 @@ function advEntry(){
 home();onboard();
 
 </script>
-</body>
+<script>if("serviceWorker"in navigator&&location.protocol.indexOf("http")===0){addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script></body>
 </html>
