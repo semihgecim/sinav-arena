@@ -601,6 +601,7 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
 
   <section id="s-tl" hidden>
     <div class="col">
+      <div id="tl-arena" class="arena-mini"></div>
       <div class="meta"><span id="tl-round"></span><span id="tl-score"></span></div>
       <article class="card"><p class="q">Olayları eskiden yeniye sırala.</p><p class="tag" style="margin:6px 0 0">Bir olaya dokun, sıradaki kutuya girsin. Kutuya dokunursan geri alırsın.</p></article>
       <div class="slots" id="tl-slots"></div>
@@ -2155,6 +2156,16 @@ function rewardFx(o){
   w.innerHTML=sp+i3(k,110,'rwi');
   document.body.appendChild(w);setTimeout(()=>w.remove(),2000);
 }
+
+(function(){
+  const _tn=tlNext,_tc=tlCheck;
+  tlNext=function(){_tn.apply(this,arguments);miniArena('tl-arena','Tarih',null,'Tur '+(tl.round+1)+'/'+TLR)};
+  tlCheck=function(){
+    _tc.apply(this,arguments);
+    const sorted=tl.set.slice().sort((a,b)=>a[0]-b[0]);let r=0;tl.placed.forEach((e,i)=>{if(sorted[i]===e)r++});
+    miniArena('tl-arena','Tarih',r>=3?'me':r<=1?'rv':null,'Tur '+(tl.round+1)+'/'+TLR);
+  };
+})();
 
 home();onboard();
 
