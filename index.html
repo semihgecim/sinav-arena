@@ -438,6 +438,32 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
 @keyframes spfloat{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-22px)}}
 .spflash{animation:spfl .4s}
 @keyframes spfl{0%{transform:scale(1.35)}100%{transform:scale(1)}}
+/* ---- düello arenası ---- */
+#duel{margin-bottom:12px}
+.duel{position:relative;height:218px;border-radius:20px;overflow:hidden;border:2px solid rgba(255,255,255,.18);background-color:#12203f;background-size:cover;background-position:center;box-shadow:0 10px 26px rgba(0,0,0,.35)}
+.duel::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 115%,rgba(255,200,61,.3),transparent 60%)}
+.duel::after{content:"";position:absolute;left:0;right:0;bottom:0;height:36px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.45))}
+.duel.shake{animation:shk .4s}
+.du-top{position:absolute;left:12px;right:12px;top:10px;display:flex;justify-content:space-between;z-index:4}
+.du-clock{background:#ffc83d;color:#1a1200;font-weight:800;border-radius:99px;padding:3px 10px;font-size:13px}
+.du-d{background:rgba(10,17,38,.55);color:#fff;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;backdrop-filter:blur(4px)}
+.du-score{position:absolute;left:50%;top:38px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:44px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.45),0 0 18px rgba(0,0,0,.4);z-index:4}
+.du-score i{font-style:normal;opacity:.7;font-size:30px}
+.du-streak{position:absolute;left:50%;top:104px;transform:translateX(-50%);z-index:4;background:rgba(255,176,46,.95);color:#3a1d00;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:800}
+.du-streak.hot{background:#ff5d3a;color:#fff;animation:bb 1s ease-in-out infinite}
+.du-me,.du-rv{position:absolute;bottom:6px;width:112px;height:150px;z-index:3;filter:drop-shadow(0 6px 6px rgba(0,0,0,.4));text-align:center}
+.du-me{left:3%}.du-rv{right:3%}
+.du-me img,.du-me svg,.du-rv svg{width:100%;height:132px;object-fit:contain}
+
+.du-me em,.du-rv em{position:absolute;left:0;right:0;bottom:-2px;font-style:normal;font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.du-me.hop,.du-rv.hop{animation:hop .5s}
+.du-rv.hit svg{animation:hitb .5s}
+.orb{position:absolute;top:120px;width:22px;height:22px;border-radius:50%;z-index:5;background:radial-gradient(circle,#fff,#ffd25e 55%,rgba(255,200,60,0) 72%);box-shadow:0 0 18px 6px rgba(255,210,90,.7);pointer-events:none}
+.orb.me{left:22%;animation:orbR .55s ease-in forwards}
+.orb.rv{right:22%;background:radial-gradient(circle,#fff,#ff7a8a 55%,rgba(255,80,100,0) 72%);box-shadow:0 0 18px 6px rgba(255,100,120,.7);animation:orbL .55s ease-in forwards}
+@keyframes orbR{from{transform:translateX(0) scale(.6);opacity:1}to{transform:translateX(170px) scale(1.5);opacity:0}}
+@keyframes orbL{from{transform:translateX(0) scale(.6);opacity:1}to{transform:translateX(-170px) scale(1.5);opacity:0}}
+@media (prefers-reduced-motion:reduce){.duel.shake,.du-me.hop,.du-rv.hop,.du-rv.hit svg,.orb,.du-streak.hot{animation:none}}
 </style>
 </head>
 <body>
@@ -2000,6 +2026,59 @@ function advEntry(){
   e.querySelector('#adv-go').addEventListener('click',()=>{sfx('tap');advMap(true)});
   e.querySelector('#kng-go').addEventListener('click',()=>{sfx('tap');kngOpen()});
 }
+
+/* ================= DÜELLO ARENASI (maç ekranı sahnesi) ================= */
+(function(){
+  const sec=document.getElementById('s-match');if(!sec)return;
+  const board=sec.querySelector('.board');if(board)board.style.display='none';
+  const holder=document.createElement('div');holder.id='duel';
+  (board||sec.firstElementChild).insertAdjacentElement('beforebegin',holder);
+})();
+function rivalSvg(rv,mood){
+  let h=0;for(const ch of rv.n)h=(h*31+ch.charCodeAt(0))%997;
+  const skin=['#ffd7b5','#f1c27d','#e0ac69','#c68642'][h%4],hair=['#2b1b12','#5a3825','#a0522d','#1b1b1b','#c9a227'][(h>>2)%5];
+  const style=(h>>1)%3;
+  const hairSvg=style===0?'<path d="M15 30q1-19 17-19t17 19q-7-8-17-8t-17 8z" fill="'+hair+'"/>':
+    style===1?'<path d="M14 32q-2-22 18-22t18 22q-4-6-6-10-10 4-24 0-3 4-6 10z" fill="'+hair+'"/><rect x="12" y="28" width="6" height="14" rx="3" fill="'+hair+'"/><rect x="46" y="28" width="6" height="14" rx="3" fill="'+hair+'"/>':
+    '<path d="M15 28q2-18 17-18t17 18l-4-4-6 3-7-5-8 5-5-1z" fill="'+hair+'"/><circle cx="32" cy="9" r="4.5" fill="'+hair+'"/>';
+  const eyes=mood==='sad'?'<path d="M22 30l7 2M42 30l-7 2" stroke="#2b1b12" stroke-width="2.2" stroke-linecap="round"/><circle cx="26" cy="33" r="2.2" fill="#2b1b12"/><circle cx="38" cy="33" r="2.2" fill="#2b1b12"/>':
+    mood==='happy'?'<path d="M22 31q4-5 8 0M34 31q4-5 8 0" fill="none" stroke="#2b1b12" stroke-width="2.4" stroke-linecap="round"/>':
+    '<circle cx="26" cy="31" r="2.6" fill="#2b1b12"/><circle cx="38" cy="31" r="2.6" fill="#2b1b12"/><path d="M22 26l7 2M42 26l-7 2" stroke="#2b1b12" stroke-width="2" stroke-linecap="round"/>';
+  const mouth=mood==='happy'?'<path d="M26 39q6 8 12 0z" fill="#fff" stroke="#5a2d1c" stroke-width="1.6" stroke-linejoin="round"/>':
+    mood==='sad'?'<path d="M27 43q5-5 10 0" fill="none" stroke="#5a2d1c" stroke-width="2.2" stroke-linecap="round"/>':
+    '<path d="M28 41h8" stroke="#5a2d1c" stroke-width="2.2" stroke-linecap="round"/>';
+  const ini=(typeof initials==='function'?initials(rv.n):rv.n.slice(0,2));
+  return '<svg class="rival" viewBox="0 0 64 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
+    '<ellipse cx="32" cy="81" rx="18" ry="3" fill="rgba(0,0,0,.3)"/>'+
+    '<path d="M10 48q22-10 44 0l4 30H6z" fill="'+rv.col+'"/>'+
+    '<rect x="20" y="48" width="24" height="26" rx="9" fill="#243046"/><circle cx="32" cy="60" r="7" fill="#ffd25e"/><text x="32" y="63.5" text-anchor="middle" font-size="8" font-weight="800" fill="#3a2a00" font-family="Sora,sans-serif">'+ini+'</text>'+
+    '<rect x="22" y="70" width="8" height="10" rx="3.5" fill="#1b2233"/><rect x="34" y="70" width="8" height="10" rx="3.5" fill="#1b2233"/>'+
+    '<circle cx="32" cy="31" r="16" fill="'+skin+'"/>'+hairSvg+
+    '<circle cx="21" cy="37" r="3" fill="#ff9d8a" opacity=".5"/><circle cx="43" cy="37" r="3" fill="#ff9d8a" opacity=".5"/>'+eyes+mouth+'</svg>';
+}
+function duelRender(mood,res,ders){
+  const el=document.getElementById('duel');if(!el||typeof m==='undefined'||!m)return;
+  const d=ders||(m.cur&&Q[m.cur.idx][6])||'Tarih';
+  const bg=(typeof IMG!=='undefined'&&IMG['w_'+d])?'background-image:linear-gradient(180deg,rgba(8,14,32,.15),rgba(8,14,32,.6)),url('+IMG['w_'+d]+')':'';
+  const heroPose=res==='me'?(m.streak>=3?'win':'happy'):res==='rv'?'sad':res==='none'?'think':'fight';
+  const rvMood=res==='me'?'sad':res==='rv'?'happy':'idle';
+  const st=m.streak>=2?'<div class="du-streak'+(m.streak>=4?' hot':'')+'">Seri ×'+m.streak+'</div>':'';
+  el.innerHTML='<div class="duel '+(res==='rv'?'shake':'')+'" style="'+bg+'">'+
+    '<div class="du-top"><span class="du-clock">'+(m.pos+1)*9+'\'</span><span class="du-d">'+d+'</span></div>'+
+    '<div class="du-score"><b>'+m.me+'</b><i>–</i><b>'+m.rvs+'</b></div>'+st+
+    '<div class="du-me '+(res==='me'?'hop':'')+'">'+heroSvg(heroPose)+'<em>Sen</em></div>'+
+    '<div class="du-rv '+(res==='me'?'hit':res==='rv'?'hop':'')+'">'+rivalSvg(m.rv,rvMood)+'<em>'+m.rv.n+'</em></div>'+
+    (res==='me'?'<span class="orb me"></span>':res==='rv'?'<span class="orb rv"></span>':'')+
+    '</div>';
+}
+(function(){
+  const _next=nextPos,_ans=mAnswer;
+  nextPos=function(){_next.apply(this,arguments);duelRender('idle',null)};
+  mAnswer=function(i){
+    const was=m.locked;_ans.apply(this,arguments);if(was)return;
+    const last=m.marks[m.pos];duelRender(last==='g'?'happy':null,last==='g'?'me':last==='c'?'rv':'none');
+  };
+})();
 
 home();onboard();
 
