@@ -478,6 +478,20 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
 .du-rv.art.sadv img{filter:saturate(.55) brightness(.85);transform:rotate(-5deg) translateY(4px)}
 .du-rv.art.hit img{animation:hitb .5s}
 .du-rv.art img{-webkit-mask-image:linear-gradient(180deg,#000 72%,transparent 98%);mask-image:linear-gradient(180deg,#000 72%,transparent 98%)}
+
+.arena-mini{margin:0 0 10px}
+.duel.mini{height:112px;border-radius:16px}
+.duel.mini .du-top{top:6px}
+.duel.mini .du-me,.duel.mini .du-rv{width:76px;height:98px}
+.duel.mini .du-rv.art{width:86px}
+.duel.mini .du-me svg,.duel.mini .du-me img,.duel.mini .du-rv svg,.duel.mini .du-rv.art img{height:88px}
+.duel.mini .du-rv em{display:none}
+#rwfx{position:fixed;left:50%;top:38%;width:0;height:0;z-index:99;pointer-events:none}
+#rwfx .rwi{position:absolute;left:-55px;top:-55px;animation:rwpop 1.8s cubic-bezier(.2,1.4,.4,1) both}
+#rwfx b{position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;opacity:0;animation:rwsp 1.1s var(--d) ease-out both}
+@keyframes rwpop{0%{transform:scale(0) rotate(-25deg);opacity:0}30%{transform:scale(1.25) rotate(8deg);opacity:1}55%{transform:scale(1) rotate(0)}85%{opacity:1}100%{transform:scale(1.1) translateY(-30px);opacity:0}}
+@keyframes rwsp{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.3)}}
+@media (prefers-reduced-motion:reduce){#rwfx .rwi,#rwfx b{animation-duration:.01s}}
 </style>
 </head>
 <body>
@@ -548,7 +562,7 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
       <div id="mopts" class="opts"></div>
       <div id="mres" class="card fb" hidden>
         <h3 id="mres-t"></h3><p id="mres-p"></p>
-        <button id="mnext" class="btn" type="button">Sonraki pozisyon</button>
+        <button id="mnext" class="btn" type="button">Sonraki tur</button>
         <button class="link rep-btn" type="button">Bu soruda hata var</button>
       </div>
     </div>
@@ -561,6 +575,7 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
         <div><span class="tag">Süre</span><div class="big" id="sp-time">60</div></div>
         <div style="text-align:right"><span class="tag">Puan</span><div class="big" id="sp-score">0</div><span class="streak" id="sp-combo"></span></div>
       </div>
+      <div id="sp-arena" class="arena-mini"></div>
       <article class="card"><div class="qhead" id="sp-head"></div><p class="q" id="sp-q"></p></article>
       <div id="sp-opts" class="opts"></div>
     </div>
@@ -634,6 +649,7 @@ img.avt,img.boss{display:block;height:100%;width:auto;filter:drop-shadow(0 5px 6
       </div>
       <div id="ex-run" class="col" hidden>
         <div class="card hud"><div><span class="tag">Kalan süre</span><div class="big" id="ex-time" style="font-size:34px">00:00</div></div><div style="text-align:right"><span class="tag">Soru</span><div class="big" id="ex-pos" style="font-size:34px">1</div></div></div>
+        <div id="ex-arena" class="arena-mini"></div>
         <article class="card"><div class="qhead" id="ex-head"></div><p class="q" id="ex-q"></p></article>
         <div id="ex-opts" class="opts"></div>
         <div class="row2"><button id="ex-prev" class="btn ghost" type="button">Önceki</button><button id="ex-next" class="btn" type="button">Sonraki</button></div>
@@ -866,7 +882,7 @@ function rankInfo(xp){
 }
 /* ---------- ana menü ---------- */
 const MODES=[
-  {t:'Maç',tag:'Düello',d:'Rakibe karşı 10 pozisyon. Hızlı bilen golü atar.',f:()=>startMatch()},
+  {t:'Maç',tag:'Düello',d:'Rakibe karşı 10 tur. Hızlı bilen vuruşu yapar.',f:()=>startMatch()},
   {t:'Merdiven',tag:'Tek kişilik',d:'10 basamak, yanlışta düşersin. Jokerler var.',f:()=>startLadder()},
   {t:'Hız Turu',tag:'Refleks',d:'60 saniye. Doğru +3 saniye ekler, yanlış 5 saniye götürür.',f:()=>startSpeed()},
   {t:'Hakem Kararı',tag:'Karar',d:'Verilen cevap doğru mu? 10 saniyede karar ver.',f:()=>startRef()},
@@ -1017,7 +1033,7 @@ function nextPos(){
   if(!rc){const w=[0,1,2,3,4].filter(k=>k!==correct);rp=w[Math.floor(Math.random()*4)]}
   m.cur={idx,perm,correct,rc,rt,rp};m.locked=false;
   $('clock').textContent=((m.pos+1)*9)+"'";
-  $('mm-pos').innerHTML='Pozisyon <b>'+(m.pos+1)+'/10</b>';
+  $('mm-pos').innerHTML='Tur <b>'+(m.pos+1)+'/10</b>';
   $('mm-streak').innerHTML=m.streak>1?'<span class="streak">Seri ×'+m.streak+'</span>':'';
   drawMarks();
   $('mqhead').innerHTML=pills(idx);$('mqtext').textContent=q[2];
@@ -1039,7 +1055,7 @@ function confetti(){
 }
 function goal(kind,sub){
   const el=$('goal');el.className='goal '+kind;
-  $('goal-t').textContent=kind==='me'?'GOOOL!':'Rakip gol attı';
+  $('goal-t').textContent=kind==='me'?'İSABET!':'Rakip vurdu';
   $('goal-s').textContent=sub;el.hidden=false;
   if(kind==='me')confetti();
   clearTimeout(goal.h);goal.h=setTimeout(()=>el.hidden=true,1400);
@@ -1072,10 +1088,10 @@ function mAnswer(i){
   else if(res==='rv'){sfx('conc');goal('rv',sub)}
   else sfx('no');
   $('mres').className='card fb '+(res==='me'?'ok':res==='rv'?'no':'');
-  $('mres-t').textContent=res==='me'?'Gol, sen attın.':res==='rv'?(ok?'Rakip daha hızlıydı, gol onda.':'Rakip gol attı.'):'Pozisyon boşa gitti.';
+  $('mres-t').textContent=res==='me'?'Vuruş sende!':res==='rv'?(ok?'Rakip daha hızlıydı, vuruş onda.':'Rakip vurdu.'):'Tur boşa gitti.';
   $('mres-p').textContent=sub+'\n'+q[5];
   $('mres').hidden=false;
-  $('mnext').textContent=m.pos===9?'Maç sonu':'Sonraki pozisyon';
+  $('mnext').textContent=m.pos===9?'Düello sonu':'Sonraki tur';
 }
 $('mnext').addEventListener('click',()=>{if(m.pos===9)endMatch();else{m.pos++;nextPos();try{window.scrollTo(0,0)}catch(e){}}});
 function endMatch(){
@@ -1086,7 +1102,7 @@ function endMatch(){
   const lgd=getLeague();lgd.xp+=xp;lgd.p+=pts;lgd[r]++;
   try{localStorage.setItem('sa_lg',JSON.stringify(lgd))}catch(e){}
   if(r==='w')sfx('goal');
-  endScreen({title:'Maç sonu · '+(r==='w'?'Galibiyet':r==='d'?'Beraberlik':'Mağlubiyet')+' · '+m.rv.n,score:m.me+' – '+m.rvs,sub:'+'+xp+' XP · '+m.right+'/10 doğru · en uzun seri '+m.best+'. Lig puanın: '+lgd.p+' ('+lgd.w+' G, '+lgd.d+' B, '+lgd.l+' M).',missed:m.missed});
+  endScreen({title:'Düello sonu · '+(r==='w'?'Galibiyet':r==='d'?'Beraberlik':'Mağlubiyet')+' · '+m.rv.n,score:m.me+' – '+m.rvs,sub:'+'+xp+' XP · '+m.right+'/10 doğru · en uzun seri '+m.best+'. Lig puanın: '+lgd.p+' ('+lgd.w+' G, '+lgd.d+' B, '+lgd.l+' M).',missed:m.missed});
 }
 
 /* ================= HIZ TURU ================= */
@@ -2107,6 +2123,38 @@ function duelRender(mood,res,ders){
     const last=m.marks[m.pos];duelRender(last==='g'?'happy':null,last==='g'?'me':last==='c'?'rv':'none');
   };
 })();
+
+/* ===== mini arena (Hız Turu, Sınav) + ödül efekti ===== */
+function miniArena(id,d,res,tag){
+  const el=document.getElementById(id);if(!el)return;
+  const bg=(typeof IMG!=='undefined'&&IMG['w_'+d])?'background-image:linear-gradient(180deg,rgba(8,14,32,.15),rgba(8,14,32,.6)),url('+IMG['w_'+d]+')':'';
+  const rvMood=res==='me'?'sad':res==='rv'?'happy':'idle';
+  const heroPose=res==='me'?'happy':res==='rv'?'sad':'fight';
+  const rv=RVART[d]?'<img src="'+RVART[d][rvMood]+'" alt="" draggable="false"><em>'+RVART[d].n+'</em>':rivalSvg(RIVALS[0],rvMood);
+  el.innerHTML='<div class="duel mini" style="'+bg+'"><div class="du-top"><span class="du-d">'+d+'</span>'+(tag?'<span class="du-clock">'+tag+'</span>':'')+'</div>'+
+    '<div class="du-me '+(res==='me'?'hop':'')+'">'+heroSvg(heroPose)+'</div>'+
+    '<div class="du-rv '+(RVART[d]?'art ':'')+(res==='me'?'hit':res==='rv'?'hop':'')+'">'+rv+'</div></div>';
+}
+(function(){
+  const _sn=spNext,_sa=spAnswer,_ed=exDraw,_es=endScreen;
+  spNext=function(){_sn.apply(this,arguments);if(sp&&sp.cur)miniArena('sp-arena',Q[sp.cur.idx][6],null,sp.combo>1?'Seri ×'+sp.combo:'')};
+  spAnswer=function(i){
+    if(sp.locked||sp.over)return;const r0=sp.right;
+    _sa.apply(this,arguments);
+    miniArena('sp-arena',Q[sp.cur.idx][6],sp.right>r0?'me':'rv',sp.combo>1?'Seri ×'+sp.combo:'');
+  };
+  exDraw=function(){_ed.apply(this,arguments);if(ex&&ex.q)miniArena('ex-arena',Q[ex.q[ex.pos]][6],null,(ex.pos+1)+'/'+ex.q.length)};
+  endScreen=function(o){_es.apply(this,arguments);try{rewardFx(o)}catch(e){}};
+})();
+function rewardFx(o){
+  const t=(o&&o.title)||'';
+  const k=/Galibiyet|Zafer|Tamam/.test(t)?'trophy':/Hız/.test(t)?'rocket':/Mağlubiyet/.test(t)?'heart':'medal';
+  const old=document.getElementById('rwfx');if(old)old.remove();
+  const w=document.createElement('div');w.id='rwfx';
+  let sp='';for(let i=0;i<22;i++){const a=i/22*6.283,r=90+Math.random()*80;sp+='<b style="--x:'+Math.cos(a)*r+'px;--y:'+Math.sin(a)*r+'px;--d:'+(Math.random()*.25)+'s;background:'+['#ffc83d','#ff4d63','#2fd18a','#6ab7ff','#fff'][i%5]+'"></b>'}
+  w.innerHTML=sp+i3(k,110,'rwi');
+  document.body.appendChild(w);setTimeout(()=>w.remove(),2000);
+}
 
 home();onboard();
 
